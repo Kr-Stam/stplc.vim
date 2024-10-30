@@ -1,3 +1,12 @@
+if !exists("main_syntax")
+	if exists("b:current_syntax")
+		finish
+	endif
+	let main_syntax = 'stplc'
+elseif exists("b:current_syntax") && b:current_syntax == "stplc"
+	finish
+endif
+
 "----------------SYMBOL-MATCHING------------------
 
 " constants
@@ -28,6 +37,15 @@ syn match stplcStruct        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
 syn match stplcEnumeration   /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
 syn match stplcFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
 
+" TODO: Finish this when I am not lazy
+" variable names
+"syn case  match
+"syn match stplcVariablefb /\(\s\|^\|(\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariablen  /\(\s*\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariablel        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariabler   /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariableFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
+
 " control statements
 syn case    ignore
 syn keyword stplcConditional if else then elsif end_if case end_case
@@ -41,10 +59,11 @@ syn match stplcOperator /[+-:=<>;]/
 
 " values
 syn case    match
-syn match   stplcString  /".*"/
+syn match   stplcString  /\(".*"\)\|\('.*'\)/
 syn keyword stplcBoolean true false
-"syn match   stplcNumber  /\(\s*\)\@<=-\?\d\+[ ;]/ " this is not needed
+syn match   stplcNumber  /\([a-zA-Z]\)\@<!\(\s\|^\)-\?\d\+/
 
+" tgawe 1 
 " comments
 syn case  ignore
 syn match stplcCommentMultiLine     /\(\*\*\_.*.*\*\*\)/
