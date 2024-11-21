@@ -11,7 +11,8 @@ endif
 
 " constants
 syn case  match
-syn match stplcConstant /\([ \t(]*\)\@<=[A-Z_]\+\([a-z]\)\@!\([ ;\n)]\)\@=/
+"syn match stplcConstant /\([a-z]\)\@<![A-Z_]\+\([a-z]\)\@!\([ ;\n)\]]\)\@=/
+syn match stplcConstant /\<[A-Z_]\+\>/
 
 " keywords
 syn case ignore
@@ -27,24 +28,27 @@ syn keyword stplcArray     array
 " standard functions
 syn case    ignore
 syn keyword stplcSizeOf sizeof
+syn keyword stplcAdr adr
 syn keyword stplcMalloc __new __delete
 " TODO: need to add all conversion functions
 
 " block identifiers
 syn case  match
-syn match stplcFunctionBlock /\(\s*\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
-syn match stplcStruct        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
-syn match stplcEnumeration   /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
-syn match stplcFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
+syn match stplcFunctionBlock /\(\s*\)\@<=FB_[A-Za-z]*\([; \n).\])]\)\@=/
+syn match stplcStruct        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n).\])]\)\@=/
+syn match stplcEnumeration   /\(\s*\)\@<=E_[A-Za-z]*\([; \n).\])]\)\@=/
+syn match stplcFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n).\]()]\)\@=/
+syn match stplcGlobalVarList /\(\s*\)\@<=GVL_[A-Za-z]*\([; \n).\])]\)\@=/
 
-" TODO: Finish this when I am not lazy
+" TODO: Finish this when I am not lazy, the idea is to differentiate different
+"       variable types
 " variable names
 "syn case  match
-"syn match stplcVariablefb /\(\s\|^\|(\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariablen  /\(\s*\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariablel        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariabler   /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariableFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariablefb        /\(\s\|^\|(\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariablen         /\(\s*\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariablel         /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariabler         /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcVariableFunction  /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
 
 " control statements
 syn case    ignore
@@ -55,7 +59,7 @@ syn keyword stplcFunction return exit
 
 " operators
 syn case    ignore
-syn match stplcOperator /[+-:=<>;]/
+syn match stplcOperator /[+-:=<>;\^\[\]()\*/]/
 
 " values
 syn case    match
@@ -109,10 +113,12 @@ hi def link stplcPointer       stplcType
 hi def link stplcEnumeration   stplcType
 hi def link stplcFunctionBlock stplcType
 hi def link stplcStruct        stplcType
+hi def link stplcGlobalVarList stplcType
 hi def link stplcType          Type
 
 " functions
 hi def link stplcSizeOf    stplcFunction
+hi def link stplcAdr       stplcFunction
 hi def link stplcMalloc    stplcFunction
 hi def link stplcFunction  Function
 
