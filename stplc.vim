@@ -7,12 +7,13 @@ elseif exists("b:current_syntax") && b:current_syntax == "stplc"
 	finish
 endif
 
-"----------------SYMBOL-MATCHING------------------
+syntax clear
 
+"----------------SYMBOL-MATCHING------------------
 " constants
 syn case  match
 "syn match stplcConstant /\([a-z]\)\@<![A-Z_]\+\([a-z]\)\@!\([ ;\n)\]]\)\@=/
-syn match stplcConstant /\<[A-Z_]\+\>/
+syn match stplcConstant /\<[A-Z_][[:alnum:]_]\+\>/
 
 " keywords
 syn case ignore
@@ -25,30 +26,17 @@ syn keyword stplcPointer   pointer
 syn keyword stplcReference reference
 syn keyword stplcArray     array
 
-" standard functions
-syn case    ignore
-syn keyword stplcSizeOf sizeof
-syn keyword stplcAdr adr
-syn keyword stplcMalloc __new __delete
-" TODO: need to add all conversion functions
-
 " block identifiers
 syn case  match
-syn match stplcFunctionBlock /\(\s*\)\@<=FB_[A-Za-z]*\([; \n).\])]\)\@=/
+"TODO: Does not match test : __SYSTEM.VAR_INFO;
+syn match stplcDefinition     /\v:\s*\zs[[:alnum:]\._]+\ze[:;\(]$/
+syn match stplcFunctionBlock /\(\s*\)\@<=FB_[A-Za-z]*\([; \n).\])(]\)\@=/
 syn match stplcStruct        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n).\])]\)\@=/
 syn match stplcEnumeration   /\(\s*\)\@<=E_[A-Za-z]*\([; \n).\])]\)\@=/
 syn match stplcFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n).\]()]\)\@=/
 syn match stplcGlobalVarList /\(\s*\)\@<=GVL_[A-Za-z]*\([; \n).\])]\)\@=/
-
-" TODO: Finish this when I am not lazy, the idea is to differentiate different
-"       variable types
-" variable names
-"syn case  match
-"syn match stplcVariablefb        /\(\s\|^\|(\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariablen         /\(\s*\)\@<=FB_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariablel         /\(\s*\)\@<=ST_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariabler         /\(\s*\)\@<=E_[A-Za-z]*\([; \n]\)\@=/
-"syn match stplcVariableFunction  /\(\s*\)\@<=F_[A-Za-z]*\([; \n]\)\@=/
+"syn match stplcMethod /\s*\.\zs[[:alnum:]]+\ze(/
+syn match stplcMethod /\v\s*\zs_*[[:alnum:]]+\ze\(/
 
 " control statements
 syn case    ignore
@@ -59,34 +47,42 @@ syn keyword stplcFunction return exit
 
 " operators
 syn case    ignore
-syn match stplcOperator /[+-:=<>;\^\[\]()\*/]/
+syn match stplcOperator /[\+\-:=<>;\^\[\]()/\*\.]/
 
 " values
 syn case    match
 syn match   stplcString  /\(".*"\)\|\('.*'\)/
-syn keyword stplcBoolean true false
-syn match   stplcNumber  /\([a-zA-Z]\)\@<!\(\s\|^\)-\?\d\+/
+syn keyword stplcBoolean true false TRUE FALSE
+"syn match stplcNumber /\%(^\|\s\|\.\)\zs-\?\d\+\ze\%($\|\s\|;\|\.\|]\)/
+syn match stplcNumber /\v(\(|^|\s|\.|\[|([^[:alnum:]_]))@<=-?\d+(\)|$|\s|;|\.|,|])@=/
+
+syn match stplcXML      /<.*>/
+syn match stplcCDATA    /<!\[CDATA\[/
+syn match stplcCDATAEnd /\]\]>/
+"syn region stplcXML start=/</ skip=/CDATA\[.*\]/ end=/>/
 
 " tgawe 1 
 " comments
-syn case  ignore
-syn match stplcCommentMultiLine     /\(\*\*\_.*.*\*\*\)/
-syn match stplcCommentSingleLine    /\/\/.*$/
-syn match stplcDocCommentMultiLine  /\(\*\*\*\_.*.*\*\*\*\)/
-syn match stplcDocCommentSingleLine /\/\/\/.*$/
-"syn match stplcCommentImportant     /\/\/!.*$/
-"syn match stplcCommentQuestion      /\/\/?.*$/
+syn case  match
+syn match stplcCommentTodo /\v<(TODO|FIXME|NOTE|BUG):?/ containedin=ALL
+syn region stplcCommentMultiLine start=/(\*/ skip=/TODO/ end=/\*)/
+syn match stplcCommentSingleLine /\/\/.*$/
+syn match stplcCommentImportant  /\/\/!.*$/
+syn match stplcCommentQuestion   /\/\/?.*$/
+syn match stplcCommentDocKeyword /\v<(DESCRIPTION|AUTHOR|Status):?/ containedin=ALL
 
 " pragmas
 syn case  ignore
 syn match stplcPragma /{.*}/
 
 "----------------SYMBOL-LINKING-------------------
+hi def link stplcXML      LineNr
+hi def link stplcCDATA    LineNr
+hi def link stplcCDATAEnd LineNr
 
 " keywords
 hi def link stplcPointer   stplcKeyword
 hi def link stplcReference stplcKeyword
-hi def link stplcArray     stplcKeyword
 hi def link stplcKeyword   Keyword
 
 " values
@@ -97,8 +93,13 @@ hi def link stplcNumber  Number
 " comments
 hi def link stplcCommentSingleLine Comment
 hi def link stplcCommentMultiLine  Comment
-hi def link stplcDocCommentMultiLine  Comment
-hi def link stplcDocCommentSingleLine Comment
+"hi def link stplcDocCommentMultiLine  Comment
+"hi def link stplcDocCommentSingleLine Comment
+hi def link stplcCommentImportant  DiagnosticWarn
+hi def link stplcCommentQuestion   MoreMsg
+hi def link stplcCommentTodo       Todo
+highlight MyUnderlined guifg=#909bb0 gui=underline
+hi def link stplcCommentDocKeyword MyUnderlined
 
 " pragmas
 hi def link stplcPragma  Macro
@@ -113,14 +114,14 @@ hi def link stplcPointer       stplcType
 hi def link stplcEnumeration   stplcType
 hi def link stplcFunctionBlock stplcType
 hi def link stplcStruct        stplcType
-hi def link stplcGlobalVarList stplcType
+hi def link stplcDefinition    stplcType
 hi def link stplcType          Type
 
+hi def link stplcGlobalVarList @namespace
+
 " functions
-hi def link stplcSizeOf    stplcFunction
-hi def link stplcAdr       stplcFunction
-hi def link stplcMalloc    stplcFunction
 hi def link stplcFunction  Function
+hi def link stplcMethod    Function
 
 " statements
 hi def link stplcStatement Statement
