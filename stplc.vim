@@ -12,12 +12,11 @@ syntax clear
 "----------------SYMBOL-MATCHING------------------
 " constants
 syn case  match
-"syn match stplcConstant /\([a-z]\)\@<![A-Z_]\+\([a-z]\)\@!\([ ;\n)\]]\)\@=/
-syn match stplcConstant /\<[A-Z_][[:alnum:]_]\+\>/
+syn match stplcConstant /\<[A-Z][A-Z_]\+\>/
 
 " keywords
 syn case ignore
-syn keyword stplckeyword do then to of constant
+syn keyword stplckeyword to of constant
 
 " variable types
 syn case    ignore
@@ -28,35 +27,37 @@ syn keyword stplcArray     array
 
 " block identifiers
 syn case  match
+syn match stplcCall /\<[[:alnum:]_]\+\ze(/
 "TODO: Does not match test : __SYSTEM.VAR_INFO;
-syn match stplcDefinition     /\v:\s*\zs[[:alnum:]\._]+\ze[:;\(]$/
-syn match stplcFunctionBlock /\(\s*\)\@<=FB_[A-Za-z]*\([; \n).\])(]\)\@=/
-syn match stplcStruct        /\(\s*\)\@<=ST_[A-Za-z]*\([; \n).\])]\)\@=/
-syn match stplcEnumeration   /\(\s*\)\@<=E_[A-Za-z]*\([; \n).\])]\)\@=/
-syn match stplcFunction      /\(\s*\)\@<=F_[A-Za-z]*\([; \n).\]()]\)\@=/
+syn match stplcDefinition    /\(:\s*\)\@<=\zs[[:alnum:]_\.]\+\ze\>/
+syn match stplcFunctionBlock /\<FB_[[:alnum:]_]\+\>/
+syn match stplcStruct        /\<ST_[[:alnum:]_]\+\>/
+syn match stplcEnum          /\<E_[[:alnum:]_]\+\>/
+syn match stplcFunction      /\<F_[[:alnum:]_]\+\ze(/
 syn match stplcGlobalVarList /\(\s*\)\@<=GVL_[A-Za-z]*\([; \n).\])]\)\@=/
-"syn match stplcMethod /\s*\.\zs[[:alnum:]]+\ze(/
-syn match stplcMethod /\v\s*\zs_*[[:alnum:]]+\ze\(/
+"syn match stplcMethod        /\v\.\zs[[:alnum:]_]\+\ze\(/
 
 " control statements
 syn case    ignore
-syn keyword stplcConditional if else then elsif end_if case end_case
-syn keyword stplcLoop        while end_while for end_for 
+syn keyword stplcConditional if else then elsif end_if case end_case then
+syn keyword stplcLoop        while end_while for end_for do
 syn keyword stplcStatement   struct end_struct type end_type function_block end_function_block var end_var var_input var_output var_in_out var_config program end_program method var_global
-syn keyword stplcFunction return exit
+syn keyword stplcFunction    return exit
 
 " operators
 syn case    ignore
-syn match stplcOperator /[\+\-:=<>;\^\[\]()/\*\.]/
+syn match   stplcOperator        /[\+\-=<>;\^\[\]()/\*:\.#]/
+syn keyword stplcBitwiseOperator or and xor not
 
 " values
 syn case    match
-syn match   stplcString  /\(".*"\)\|\('.*'\)/
+syn match   stplcString  /\("[^"]*"\)\|\('[^']*'\)/
 syn keyword stplcBoolean true false TRUE FALSE
 "syn match stplcNumber /\%(^\|\s\|\.\)\zs-\?\d\+\ze\%($\|\s\|;\|\.\|]\)/
-syn match stplcNumber /\v(\(|^|\s|\.|\[|([^[:alnum:]_]))@<=-?\d+(\)|$|\s|;|\.|,|])@=/
+syn match stplcNumber /\v(\(|^|\s\.|\[|([^[:alnum:]_]))@<=-?\d+(\)|$|\s|;|\.|,|]|#)@=/
+syn match stplcNumberSpecial /\v#[0-9a-fA-F]+/
 
-syn match stplcXML      /<.*>/
+syn match stplcXML      /<[A-z].\+>/
 syn match stplcCDATA    /<!\[CDATA\[/
 syn match stplcCDATAEnd /\]\]>/
 "syn region stplcXML start=/</ skip=/CDATA\[.*\]/ end=/>/
@@ -86,9 +87,10 @@ hi def link stplcReference stplcKeyword
 hi def link stplcKeyword   Keyword
 
 " values
-hi def link stplcBoolean Boolean
-hi def link stplcString  String
-hi def link stplcNumber  Number
+hi def link stplcBoolean       Boolean
+hi def link stplcString        String
+hi def link stplcNumber        Number
+hi def link stplcNumberSpecial Number
 
 " comments
 hi def link stplcCommentSingleLine Comment
@@ -120,14 +122,15 @@ hi def link stplcType          Type
 hi def link stplcGlobalVarList @namespace
 
 " functions
-hi def link stplcFunction  Function
-hi def link stplcMethod    Function
+hi def link stplcFunction Function
+hi def link stplcCall     Function
 
 " statements
 hi def link stplcStatement Statement
 
 " operators
-hi def link stplcOperator Operator
+hi def link stplcOperator        Operator
+hi def link stplcBitwiseOperator Operator
 
 " constants
 hi def link stplcConstant Constant
